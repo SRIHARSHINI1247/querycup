@@ -1,0 +1,46 @@
+Enter the path to the PDF file: /content/sample (1).pdf
+
+Choose a summarization method:
+1. Naive
+2. TF-IDF Based
+3. Exit
+Enter choice (1-3): 1
+
+Generated Summary:
+Machine learning is a method of data analysis that automates analytical model building.
+It is a branch of artificial intelligence based on the idea that systems can learn from data,
+identify patterns, and make decisions with minimal human intervention.
+The iterative aspect of machine learning is important because as models are exposed to new data, 
+they are able to independently adapt. They learn from previous computations to produce reliable, 
+repeatable decisions and results.
+.
+
+Summary saved to summary_output_method_1.pdf
+
+Enter your query (or type 'exit' to choose another method): exit
+
+Choose a summarization method:
+1. Naive
+2. TF-IDF Based
+3. Exit
+Enter choice (1-3): 2
+
+Generated Summary:
+Machine learning is a method of data analysis that automates analytical model building.
+It is a branch of artificial intelligence based on the idea that systems can learn from data,
+identify patterns, and make decisions with minimal human intervention.
+The iterative aspect of machine learning is important because as models are exposed to new data, 
+they are able to independently adapt. They learn from previous computations to produce reliable, 
+repeatable decisions and results.
+.
+
+Summary saved to summary_output_method_2.pdf
+
+Enter your query (or type 'exit' to choose another method): exit
+
+Choose a summarization method:
+1. Naive
+2. TF-IDF Based
+3. Exit
+Enter choice (1-3): 3
+Exiting the program.
