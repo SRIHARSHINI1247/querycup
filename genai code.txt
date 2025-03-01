@@ -1,0 +1,101 @@
+import google.generativeai as genai
+import fitz  # PyMuPDF
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+from fpdf import FPDF  # To create PDFs
+
+# Set up Google PaLM API key
+API_KEY = "AIzaSyDIh1Qst3P3dOw38iqH6hT4zQ6EmcrZ8Z0"  # Replace with your actual API key
+if not API_KEY:
+    raise ValueError("API key is missing. Please provide a valid API key.")
+genai.configure(api_key=API_KEY)
+
+def extract_text_from_pdf(pdf_path):
+    """Extracts text from a given PDF file."""
+    try:
+        doc = fitz.open(pdf_path)
+        text = "\n".join(page.get_text("text") for page in doc)
+        return text
+    except Exception as e:
+        print(f"Failed to extract text from PDF: {e}")
+        return ""
+
+def extract_summary_naive(text, num_sentences=5):
+    """Extracts the first few sentences as a summary."""
+    sentences = text.split(". ")
+    return ". ".join(sentences[:num_sentences]) + "."
+
+def extract_summary_tfidf(text, num_sentences=5):
+    """Extracts summary using TF-IDF scoring."""
+    sentences = text.split(". ")
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(sentences)
+    sentence_scores = np.sum(X.toarray(), axis=1)
+    top_indices = np.argsort(sentence_scores)[-num_sentences:]
+    top_indices.sort()
+    return ". ".join([sentences[i] for i in top_indices]) + "."
+
+def query_palm(summary, user_query):
+    """Queries Google PaLM with the extracted summary and user question."""
+    prompt = f"Document Summary:\n{summary}\n\nUser Query: {user_query}\n\nAnswer:"
+    try:
+        response = genai.generate(model="models/gemini-xxl", prompt=prompt)
+        return response.get("text", "No valid response received from the AI.")
+    except Exception as e:
+        return f"Error querying PaLM API: {str(e)}"
+
+def save_summary_to_pdf(summary, output_pdf_path):
+    """Saves the summary to a PDF file."""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, summary)
+    pdf.output(output_pdf_path)
+
+def main():
+    pdf_path = input("Enter the path to the PDF file: ")
+    pdf_text = extract_text_from_pdf(pdf_path)
+
+    if not pdf_text.strip():
+        print("Error: No text found in the PDF.")
+        return
+
+    while True:
+        print("\nChoose a summarization method:")
+        print("1. Naive")
+        print("2. TF-IDF Based")
+        print("3. Exit")
+        choice = input("Enter choice (1-3): ")
+
+        if choice == '3':
+            print("Exiting the program.")
+            break
+
+        if choice == '1':
+            summary = extract_summary_naive(pdf_text)
+        elif choice == '2':
+            summary = extract_summary_tfidf(pdf_text)
+        else:
+            print("Invalid choice. Please try again.")
+            continue
+
+        print("\nGenerated Summary:")
+        print(summary)
+
+        # Save the summary to a PDF
+        output_pdf_path = f"summary_output_method_{choice}.pdf"
+        save_summary_to_pdf(summary, output_pdf_path)
+        print(f"\nSummary saved to {output_pdf_path}")
+
+        user_query = input("\nEnter your query (or type 'exit' to choose another method): ")
+        if user_query.lower() == 'exit':
+            continue
+
+        print("\nQuerying Google PaLM...")
+        answer = query_palm(summary, user_query)
+
+        print("\nAI Response:")
+        print(answer)
+
+if _name_ == "_main_":
+    main()
